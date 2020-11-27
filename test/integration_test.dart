@@ -83,30 +83,30 @@ void runTests(util.ConfigDirectory directoryConfig, {bool useConstructor}) {
     // Add the entries
 
     var attrs = {
-      "objectClass": ["organizationalUnit"],
-      "description": "Example organizationalUnit entry"
+      'objectClass': ['organizationalUnit'],
+      'description': 'Example organizationalUnit entry'
     };
 
     var result = await ldap.add(engineeringDN, attrs);
     expect(result.resultCode, equals(0),
-        reason: "Could not add engineering entry");
+        reason: 'Could not add engineering entry');
 
     result = await ldap.add(salesDN, attrs);
-    expect(result.resultCode, equals(0), reason: "Could not add sales entry");
+    expect(result.resultCode, equals(0), reason: 'Could not add sales entry');
 
     //----
     // Modify: change attribute values
 
-    var mod1 = Modification.replace("description", ["Engineering department"]);
+    var mod1 = Modification.replace('description', ['Engineering department']);
     result = await ldap.modify(engineeringDN, [mod1]);
     expect(result.resultCode, equals(0),
-        reason: "could not change engineering description attribute");
+        reason: 'could not change engineering description attribute');
 
     var mod2 = Modification.replace(
-        "description", ["Sales department", "Business development department"]);
+        'description', ['Sales department', 'Business development department']);
     result = await ldap.modify(salesDN, [mod2]);
     expect(result.resultCode, equals(0),
-        reason: "Could not change sales description attribute");
+        reason: 'Could not change sales description attribute');
 
     //----
     // Modify: rename
@@ -115,10 +115,10 @@ void runTests(util.ConfigDirectory directoryConfig, {bool useConstructor}) {
         It always moves the entry - and does not leave the old one
      */
 
-    var tmpRDN = "ou=Business Development";
+    var tmpRDN = 'ou=Business Development';
     var r = await ldap.modifyDN(
-        salesDN, tmpRDN); // rename "Sales" to "Business Development"
-    expect(r.resultCode, equals(0), reason: "Could not rename sales entry");
+        salesDN, tmpRDN); // rename 'Sales' to 'Business Development'
+    expect(r.resultCode, equals(0), reason: 'Could not rename sales entry');
 
     // Modify: rename and change parent
     //
@@ -129,24 +129,24 @@ void runTests(util.ConfigDirectory directoryConfig, {bool useConstructor}) {
     TODO: get this working
 
     r = await ldap.modifyDN(
-        businessDevelopmentDN, "ou=Support", true, engineeringDN);
+        businessDevelopmentDN, 'ou=Support', true, engineeringDN);
     expect(r.resultCode, equals(0),
-        reason: "Could not change Business Development to Support");
+        reason: 'Could not change Business Development to Support');
     */
 
     //----
     // Compare
 
     r = await ldap.compare(
-        engineeringDN, "description", "ENGINEERING DEPARTMENT");
+        engineeringDN, 'description', 'ENGINEERING DEPARTMENT');
     expect(r.resultCode, equals(ResultCode.COMPARE_TRUE),
-        reason: "Compare failed");
+        reason: 'Compare failed');
 
     //----------------
     // Search
 
-    var queryAttrs = ["ou", "objectClass"];
-    var filter = Filter.equals("ou", "Engineering");
+    var queryAttrs = ['ou', 'objectClass'];
+    var filter = Filter.equals('ou', 'Engineering');
 
     //TODO:  ldap.onError = expectAsync((e) => expect(false, 'Should not be reached'), count: 0);
 
@@ -160,7 +160,7 @@ void runTests(util.ConfigDirectory directoryConfig, {bool useConstructor}) {
       numFound++;
     }
     expect(numFound, equals(1),
-        reason: "Unexpected number of entries in (ou=Engineering)");
+        reason: 'Unexpected number of entries in (ou=Engineering)');
 
     /*
     // not(ou=Engineering)
@@ -175,7 +175,7 @@ void runTests(util.ConfigDirectory directoryConfig, {bool useConstructor}) {
     }
     expect(numFound, equals(1),
         reason:
-            "Did not find expected number of entries in (not(ou=Engineering))");
+            'Did not find expected number of entries in (not(ou=Engineering))');
             */
 
     //----
@@ -184,11 +184,11 @@ void runTests(util.ConfigDirectory directoryConfig, {bool useConstructor}) {
     if (!KEEP_ENTRIES_FOR_DEBUGGING) {
       result = await ldap.delete(bisDevDN);
       expect(result.resultCode, equals(0),
-          reason: "Could not delete business development entry");
+          reason: 'Could not delete business development entry');
 
       result = await ldap.delete(engineeringDN);
       expect(result.resultCode, equals(0),
-          reason: "Could not delete engineering entry");
+          reason: 'Could not delete engineering entry');
     }
 
     //----
@@ -197,7 +197,7 @@ void runTests(util.ConfigDirectory directoryConfig, {bool useConstructor}) {
     var deleteFailed = false;
     try {
       await ldap.delete(salesDN);
-      fail("Delete should not have succeeded: $salesDN");
+      fail('Delete should not have succeeded: $salesDN');
     } on LdapResultNoSuchObjectException catch (_) {
       deleteFailed = true;
     }

@@ -21,7 +21,7 @@ Style](https://www.dartlang.org/effective-dart/style/).
 ### Formatting
 
 The code should be formatted by running _dartfmt_ (or by using the
-"Reformat with Dart Style" command in WebStorm) before checking it in
+'Reformat with Dart Style' command in WebStorm) before checking it in
 to the git repository.
 
 ### TODO: Items to do

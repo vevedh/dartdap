@@ -1,12 +1,10 @@
 part of ldap_protocol;
 
-/**
- * LDAP Search Entry represent a single search result item.
- *
- * SearchResultEntry is a protocol Op that wraps a
- * [SearchEntry] object. We do this so that the protocol details
- * are kept out of SearchEntry for library consumers.
- */
+/// LDAP Search Entry represent a single search result item.
+///
+/// SearchResultEntry is a protocol Op that wraps a
+/// [SearchEntry] object. We do this so that the protocol details
+/// are kept out of SearchEntry for library consumers.
 
 class SearchResultEntry extends ResponseOp {
   SearchEntry _searchEntry;
@@ -14,7 +12,7 @@ class SearchResultEntry extends ResponseOp {
   SearchEntry get searchEntry => _searchEntry;
 
   SearchResultEntry.referral(LDAPMessage m) : super.searchEntry() {
-    loggeRecvLdap.fine(() => "Search result is a referral");
+    loggeRecvLdap.fine(() => 'Search result is a referral');
     var uris = m.protocolOp.elements;
     var l = uris.map((obj) => (obj as ASN1OctetString).stringValue).toList();
     _searchEntry = SearchEntry(null, referrals: l);
@@ -27,7 +25,7 @@ class SearchResultEntry extends ResponseOp {
 
     var dn = t.stringValue;
 
-    loggeRecvLdap.fine(() => "Search Result Entry: dn=${dn}");
+    loggeRecvLdap.fine(() => 'Search Result Entry: dn=${dn}');
 
     // embedded sequence is attr list
     var seq = s.elements[1] as ASN1Sequence;
@@ -45,17 +43,18 @@ class SearchResultEntry extends ResponseOp {
       searchEntry.attributes[attrName.stringValue] =
           Attribute(attrName.stringValue, valSet);
 
-      loggeRecvLdap.finest("attribute: ${attrName.stringValue}=${valSet}");
+      loggeRecvLdap.finest('attribute: ${attrName.stringValue}=${valSet}');
     });
 
     // controls are optional.
     if (s.elements.length >= 3) {
       var controls = s.elements[2];
-      loggeRecvLdap.finest("controls: ${controls}");
+      loggeRecvLdap.finest('controls: ${controls}');
     }
   }
 
+  @override
   String toString() {
-    return "SearchResultEntry($searchEntry})";
+    return 'SearchResultEntry($searchEntry})';
   }
 }

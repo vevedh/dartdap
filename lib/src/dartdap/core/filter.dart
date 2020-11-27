@@ -24,17 +24,17 @@ import 'ldap_exception.dart';
 /// * [or] - matches if at least one of its member filters match
 
 class Filter {
-  int _filterType;
+  final int _filterType;
   int get filterType => _filterType;
 
   // The assertion value for this filter.
-  String _assertionValue;
+  final String _assertionValue;
   String get assertionValue => _assertionValue;
   String _attributeName;
   String get attributeName => _attributeName;
 
   // nested filters
-  List<Filter> _subFilters = List<Filter>();
+  final List<Filter> _subFilters;
   List<Filter> get subFilters => _subFilters;
 
   // BER Types
@@ -62,7 +62,7 @@ class Filter {
   /// instead of directly using this constructor.
 
   Filter(this._filterType,
-      [this._attributeName, this._assertionValue, this._subFilters]);
+      [this._attributeName, this._assertionValue, this._subFilters]  );
 
   /// Creates a [Filter] that matches an entry that has an attribute with the given value.
   static Filter equals(String attributeName, String attrValue) =>
@@ -84,12 +84,12 @@ class Filter {
 
   /// Creates a [Filter] that matches on a substring.
   ///
-  /// The [pattern] must be a [String] of the form "attr=match", where _attr_ is
+  /// The [pattern] must be a [String] of the form 'attr=match', where _attr_ is
   /// the attribute name and _match_ is a value that has at least one `*`
   /// character. There can be wildcard `*` chararcters at the beginning, middle
   /// or end of _match_.
   ///
-  /// The _match_ must not be a single `*` (e.g. "foo=*" is not permitted). If
+  /// The _match_ must not be a single `*` (e.g. 'foo=*' is not permitted). If
   /// such a filter is required, use the [present] filter instead.
 
   static Filter substring(String attribute, String pattern) =>
@@ -116,12 +116,13 @@ class Filter {
   /// Operator version of the [or] filter factory method.
   Filter operator |(Filter other) => Filter.or([this, other]);
 
+  @override
   String toString() {
-    var s = "Filter(type=0x${_filterType.toRadixString(16)}";
-    if (_attributeName != null) s += ",attributeName=$_attributeName";
-    if (_assertionValue != null) s += ",value=$_assertionValue,";
+    var s = 'Filter(type=0x${_filterType.toRadixString(16)}';
+    if (_attributeName != null) s += ',attributeName=$_attributeName';
+    if (_assertionValue != null) s += ',value=$_assertionValue,';
     if (_subFilters != null) s += _subFilters.toString();
-    s += ")";
+    s += ')';
     return s;
   }
 
@@ -157,16 +158,17 @@ class Filter {
         return notObj;
 
       case Filter.TYPE_EXTENSIBLE_MATCH:
-        throw "Not Done yet. Fix me!!";
+        throw 'Not Done yet. Fix me!!';
 
       default:
         throw LdapUsageException(
-            "Unexpected filter type = $filterType. This should never happen");
+            'Unexpected filter type = $filterType. This should never happen');
     }
   }
 
-  Function _eq = const ListEquality().equals;
+  final Function _eq = const ListEquality().equals;
 
+  @override
   bool operator ==(other) =>
       other is Filter &&
       other._filterType == _filterType &&
@@ -197,41 +199,41 @@ class SubstringFilter extends Filter {
 
   /// The initial substring filter component. Zero or one
   String get initial => _initial;
-  /// The list of "any" components. Zero or more
+  /// The list of 'any' components. Zero or more
   List<String> get any => _any;
-  /** The final component. Zero or more */
+  /// The final component. Zero or more */
   String get finalString => _final;
 
   SubstringFilter.rfc224(String attributeName,
       {String initial, List<String> any = const [], String finalValue})
       : super(Filter.TYPE_SUBSTRING) {
-    this._attributeName = attributeName;
+    _attributeName = attributeName;
     _final = finalValue;
-    _any = any == null ? [] : any;
+    _any = any ?? [];
     _initial = initial;
   }
 
   SubstringFilter.fromPattern(String attributeName, String pattern)
       : super(Filter.TYPE_SUBSTRING) {
     // todo: We probaby need to properly escape special chars = and *
-    if (pattern == null || pattern.length <= 2 || !pattern.contains("*")) {
+    if (pattern == null || pattern.length <= 2 || !pattern.contains('*')) {
       throw LdapUsageException(
-          "Invalid substring pattern: expecting attr=match: '$pattern'");
+          'Invalid substring pattern: expecting attr=match: $pattern');
     }
 
-    this._attributeName = attributeName;
+    _attributeName = attributeName;
     // now parse initial, any, final
 
-    var x = pattern.split("*");
+    var x = pattern.split('*');
 
     if (x.length == 1) {
       throw LdapUsageException(
-          "Invalid substring pattern: missing '*': '$pattern'");
+          'Invalid substring pattern: missing *: $pattern');
     }
 
     if (!x.any((s) => s.isNotEmpty)) {
       throw LdapUsageException(
-          "Invalid substring pattern: use \"present\" filter instead: '$pattern'");
+          'Invalid substring pattern: use \'present\' filter instead: \'$pattern\'');
     }
 
     /*
@@ -242,18 +244,19 @@ class SubstringFilter extends Filter {
      *  foo*bar*baz*boo
      */
 
-    if (x[0] != "") {
+    if (x[0] != '') {
       _initial = x[0];
     }
-    if (x.last != "") {
+    if (x.last != '') {
       _final = x.last;
     }
     _any = [];
-    for (int i = 1; i < x.length - 1; ++i) {
+    for (var i = 1; i < x.length - 1; ++i) {
       _any.add(x[i]);
     }
   }
 
+  @override
   ASN1Object toASN1() {
     var seq = ASN1Sequence(tag: filterType);
     seq.add(ASN1OctetString(attributeName));
@@ -276,11 +279,12 @@ class SubstringFilter extends Filter {
     return seq;
   }
 
+  @override
   String toString() =>
-      'SubstringFilter(initial=$_initial, ${_any != null ? "any=$_any" : ""},  ${_final != null ? "final $_final" : ""})';
+      'SubstringFilter(initial=$_initial, ${_any != null ? 'any=$_any' : ""},  ${_final != null ? 'final $_final' : ""})';
 
   @override
-  operator ==(other) =>
+  bool operator ==(other) =>
       other is SubstringFilter &&
       other._filterType == _filterType &&
       other._attributeName == _attributeName &&

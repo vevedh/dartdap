@@ -1,42 +1,40 @@
 part of ldap_protocol;
 
-/**
- * Envelope for LDAP message protocol exchange
- *
- * See http://tools.ietf.org/html/rfc4511
- *
- *   LDAPMessage ::=
-         SEQUENCE {
-              messageID      MessageID,
-              protocolOp     CHOICE {
-                                  bindRequest         BindRequest,
-                                  bindResponse        BindResponse,
-                                  unbindRequest       UnbindRequest,
-                                  searchRequest       SearchRequest,
-                                  searchResEntry      SearchResultEntry,
-                                  searchResDone       SearchResultDone,
-                                  searchResRef        SearchResultReference,
-                                  modifyRequest       ModifyRequest,
-                                  modifyResponse      ModifyResponse,
-                                  addRequest          AddRequest,
-                                  addResponse         AddResponse,
-                                  delRequest          DelRequest,
-                                  delResponse         DelResponse,
-                                  modifyDNRequest     ModifyDNRequest,
-                                  modifyDNResponse    ModifyDNResponse,
-                                  compareRequest      CompareRequest,
-                                  compareResponse     CompareResponse,
-                                  abandonRequest      AbandonRequest,
-                                  extendedRequest     ExtendedRequest,
-                                  extendedResponse    ExtendedResponse,
-                                  ...,
-                                  intermediateResponse IntermediateResponse
-                             },
-              controls       [0] Controls OPTIONAL
-         }
- *
- *
- */
+ //
+ // * Envelope for LDAP message protocol exchange
+ // *
+ // * See http://tools.ietf.org/html/rfc4511
+ // *
+ // *   LDAPMessage ::=
+ //         SEQUENCE {
+ //              messageID      MessageID,
+ //              protocolOp     CHOICE {
+ //                                  bindRequest         BindRequest,
+ //                                  bindResponse        BindResponse,
+ //                                  unbindRequest       UnbindRequest,
+ //                                  searchRequest       SearchRequest,
+ //                                  searchResEntry      SearchResultEntry,
+ //                                  searchResDone       SearchResultDone,
+ //                                  searchResRef        SearchResultReference,
+ //                                  modifyRequest       ModifyRequest,
+ //                                  modifyResponse      ModifyResponse,
+ //                                  addRequest          AddRequest,
+ //                                  addResponse         AddResponse,
+ //                                  delRequest          DelRequest,
+ //                                  delResponse         DelResponse,
+ //                                  modifyDNRequest     ModifyDNRequest,
+ //                                  modifyDNResponse    ModifyDNResponse,
+ //                                  compareRequest      CompareRequest,
+ //                                  compareResponse     CompareResponse,
+ //                                  abandonRequest      AbandonRequest,
+ //                                  extendedRequest     ExtendedRequest,
+ //                                  extendedResponse    ExtendedResponse,
+ //                                  ...,
+ //                                  intermediateResponse IntermediateResponse
+ //                             },
+ //              controls       [0] Controls OPTIONAL
+ //         }
+ //
 class LDAPMessage {
   int _messageId;
   int _protocolTag;
@@ -73,7 +71,7 @@ class LDAPMessage {
       _controls = ASN1Sequence(tag: CONTROLS);
       controls.forEach((control) {
         _controls.add(control.toASN1());
-        loggerSendLdap.finest("Adding control $control");
+        loggerSendLdap.finest('Adding control $control');
       });
     }
   }
@@ -84,11 +82,11 @@ class LDAPMessage {
     _obj = ASN1Sequence.fromBytes(bytes);
 
     if (_obj == null) {
-      throw LdapParseException("Parsing error on ${bytes}");
+      throw LdapParseException('Parsing error on ${bytes}');
     }
     if (elements.length != 2 && elements.length != 3) {
       throw LdapParseException(
-          "Expecting 2 or 3 elements: got ${elements.length} obj=$_obj");
+          'Expecting 2 or 3 elements: got ${elements.length} obj=$_obj');
     }
 
     var i = elements[0] as ASN1Integer;
@@ -106,13 +104,13 @@ class LDAPMessage {
       }
     }
     loggeRecvLdap.fine(() =>
-        "LDAP message received: Id=${messageId} protocolOp=${protocolOp}");
+        'LDAP message received: Id=${messageId} protocolOp=${protocolOp}');
   }
 
   // Convert this LDAP message to a stream of ASN1 encoded bytes
   List<int> toBytes() {
-    //logger.finest("Converting this object to bytes ${toString()}");
-    ASN1Sequence seq = ASN1Sequence();
+    //logger.finest('Converting this object to bytes ${toString()}');
+    var seq = ASN1Sequence();
 
     seq.add(ASN1Integer.fromInt(_messageId));
 
@@ -122,12 +120,13 @@ class LDAPMessage {
     var b = seq.encodedBytes;
 
     //var xx = LDAPUtil.toHexString(b);
-    //logger.finest("LdapMesssage bytes = ${xx}");
+    //logger.finest('LdapMesssage bytes = ${xx}');
     return b;
   }
 
+  @override
   String toString() {
     var s = _op2String(_protocolTag);
-    return "Msg(id=${_messageId}, op=${s},controls=$_controls)";
+    return 'Msg(id=${_messageId}, op=${s},controls=$_controls)';
   }
 }

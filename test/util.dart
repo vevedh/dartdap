@@ -1,12 +1,12 @@
 /// Utility to load configurations from a YAML file.
 
-import "dart:io";
+import 'dart:io';
 import 'package:dartdap/dartdap.dart';
 import 'package:logging/logging.dart';
-import "package:yaml/yaml.dart";
+import 'package:yaml/yaml.dart';
 
 //################################################################
-// Names of common "well-known" directory configurations used by the tests.
+// Names of common 'well-known' directory configurations used by the tests.
 //
 // Note: like all directory configurations (including the default one, whose
 // name is [Config.defaultDirectoryName]) these are optional. But if they
@@ -168,7 +168,7 @@ class Config {
   //----------------------------------------------------------------
   /// Returns a string message if a directory has not been configured.
   ///
-  /// Returns a string for use with a test or group's "skip" parameter, if
+  /// Returns a string for use with a test or group's 'skip' parameter, if
   /// the [name] directory is not in the configuration file. Otherwise, null
   /// is returned if the directory is configured.
   ///
@@ -275,15 +275,15 @@ class Config {
                 'testdn': _itemTestDn,
                 'testDn': _itemTestDn,
                 'testdN': _itemTestDn,
-                'basedn': _itemTestDn, // Calling this item "testDN", because
-                'baseDn': _itemTestDn, // "baseDN" easily mistaken for "bindDN".
+                'basedn': _itemTestDn, // Calling this item 'testDN', because
+                'baseDn': _itemTestDn, // 'baseDN' easily mistaken for 'bindDN'.
                 'basedN': _itemTestDn,
               }[key];
 
               final suggestion =
-                  (correctKey != null) ? ' (use "$correctKey")' : '';
+                  (correctKey != null) ? ' (use "$correctKey)"' : '';
               throw ConfigFileException(_filename,
-                  'unexpected item: "$_directoriesItem/$name/$key"$suggestion');
+                  'unexpected item: "$_directoriesItem/$name/$key $suggestion');
             }
           }
         }
@@ -338,7 +338,7 @@ class Config {
   ///
   /// ```
   /// logging:
-  ///    "*": INFO
+  ///    '*': INFO
   ///   ldap: INFO
   ///   ldap.connection: FINE
   ///   ldap.send.ldap: INFO
@@ -413,7 +413,7 @@ class Config {
             break;
           default:
             throw ConfigFileException(_filename,
-                'unsupported level name for "$_loggingItem/$key": "$value"');
+                'unsupported level name for "$_loggingItem/$key": $value');
             break;
         }
       } else if (value is int) {
@@ -493,7 +493,7 @@ class Config {
 class ConfigDirectory {
   String host;
   int port;
-  bool ssl; // should be "tls", but using ssl for consistency with dartdap
+  bool ssl; // should be 'tls', but using ssl for consistency with dartdap
   String bindDN;
   String password;
 

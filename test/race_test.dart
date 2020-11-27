@@ -17,8 +17,8 @@ import 'util.dart' as util;
 /// (except for BIND) which will require the connection to be open.
 ///
 Future doLdapOperation(LdapConnection ldap, DN testDN) async {
-  var filter = Filter.present("cn");
-  var searchAttrs = ["cn", "sn"];
+  var filter = Filter.present('cn');
+  var searchAttrs = ['cn', 'sn'];
 
   // This search actually should not find any results, but that doesn't matter
 
@@ -33,12 +33,12 @@ Future doLdapOperation(LdapConnection ldap, DN testDN) async {
       expect(entry, const TypeMatcher<SearchEntry>());
     }
   } on LdapResultNoSuchObjectException {
-    fail("Unexpected: LdapResultNoSuchObjectException: ${testDN.dn}");
+    fail('Unexpected: LdapResultNoSuchObjectException: ${testDN.dn}');
   } catch (e) {
-    fail("Unexpected exception: $e (${e.runtimeType})");
+    fail('Unexpected exception: $e (${e.runtimeType})');
   }
 
-  expect(numResults, equals(0), reason: "Got results when not expecting any");
+  expect(numResults, equals(0), reason: 'Got results when not expecting any');
 }
 
 //----------------------------------------------------------------
@@ -54,10 +54,10 @@ void main() async {
 
     //================================================================
 
-    group("Race condition", () {
+    group('Race condition', () {
       //----------------------------------------------------------------
 
-      test("multiple opens", () async {
+      test('multiple opens', () async {
         var ldap = directoryConfig.connect();
 
         expect(ldap.state, equals(ConnectionState.closed));
@@ -96,7 +96,7 @@ void main() async {
 
       //----------------
 
-      test("multiple close", () async {
+      test('multiple close', () async {
         var ldap = directoryConfig.connect();
 
         expect(ldap.state, equals(ConnectionState.closed));

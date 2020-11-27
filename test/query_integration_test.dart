@@ -1,6 +1,6 @@
-import "package:test/test.dart";
-import "util.dart" as util;
-import "package:dartdap/dartdap.dart";
+import 'package:test/test.dart';
+import 'util.dart' as util;
+import 'package:dartdap/dartdap.dart';
 
 // Integration test against OpenDJ, populated with 2000 sample users under testDN
 // TODO: Refactor test suites to better accommodate AD, OpenDJ, OpenLDAP, etc.
@@ -11,9 +11,9 @@ import "package:dartdap/dartdap.dart";
 /// It requires a directory that has been pre-populated with sample users.
 ///
 /// This test should work with ANY LDAP DIRECTORY that has the 2000 sample users
-/// under the "testDN". The directory implementation does not matter. What
+/// under the 'testDN'. The directory implementation does not matter. What
 /// matters is the contents of the directory. Hence, the name of the directory
-/// should not describe the implementation of the directory (i.e. not "opendj"),
+/// should not describe the implementation of the directory (i.e. not 'opendj'),
 /// but describes the contents or behaviour of the directory.
 
 const specialDirectoryName = 'populated-with-2000-users';
@@ -21,7 +21,7 @@ const specialDirectoryName = 'populated-with-2000-users';
 void main() {
   final config = util.Config();
 
-  test("Query Search test", () async {
+  test('Query Search test', () async {
     final dirConfig = config.directory(specialDirectoryName);
     final ldap = dirConfig.connect();
 
@@ -29,7 +29,7 @@ void main() {
         dirConfig.testDN.dn, '(uid=user*21*)', ['dn', 'email'],
         scope: SearchScope.SUB_LEVEL);
 
-    await results.stream.forEach((r) => print("R = $r"));
+    await results.stream.forEach((r) => print('R = $r'));
 
     await ldap.close();
   }, skip: config.skipIfMissingDirectory(specialDirectoryName));

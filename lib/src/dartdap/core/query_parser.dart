@@ -13,13 +13,13 @@ class QueryParser<Filter> extends GrammarParser {
   // throws [LdapParseException] if the input can not be parsed.
   // TODO: Consider caching queries
   Filter getFilter(String input) {
-    var result = this.parse(input);
+    var result = parse(input);
 
     if (result.isSuccess) {
       return result.value;
     } else {
       throw LdapParseException(
-          "Can't parse filter '$input'. Error is ${result.message}");
+          'Cant parse filter \'$input\'. Error is ${result.message}');
     }
   }
 }
@@ -28,16 +28,21 @@ class QueryParser<Filter> extends GrammarParser {
 class QueryParserDefinition extends QueryGrammarDefinition {
   const QueryParserDefinition();
 
+  @override
   Parser attr() => super.attr().flatten();
+  @override
   Parser value() => super.value().flatten();
 
+  @override
   Parser filter() => super.filter().map((each) => each[1]);
 
+  @override
   Parser<List<Filter>> filterlist() => super.filterlist().map((each) {
         return List<Filter>.from(each);
         //
       });
 
+  @override
   Parser<Filter> simple() => super.simple().map((each) {
         var token = each[1] as Token;
         var s = token.value as String;
@@ -54,19 +59,23 @@ class QueryParserDefinition extends QueryGrammarDefinition {
           case '<=':
             return Filter.lessOrEquals(attrName, val);
           default:
-            throw Exception("Parser error (bad grammar spec). Report this bug");
+            throw Exception('Parser error (bad grammar spec). Report this bug');
         }
       });
 
+  @override
   Parser<Filter> and() =>
       super.and().map((each) => Filter.and(List<Filter>.from(each[1])));
 
+  @override
   Parser<Filter> or() =>
       super.or().map((each) => Filter.or(List<Filter>.from(each[1])));
 
+  @override
   Parser<Filter> not() => super.not().map((each) => Filter.not(each[1]));
 
   // This doesn't appear to work. The substring grammar matches before this.
+  @override
   Parser<Filter> present() =>
       super.present().map((each) => Filter.present(each[0]));
 
@@ -74,7 +83,7 @@ class QueryParserDefinition extends QueryGrammarDefinition {
   // The list is going to be a list of strings and the * token
   // We flatten the list - ommitting the * token.
   List<String> _flatten(List each) {
-    var s = List<String>();
+    var s = <String>[];
     each.forEach((val) {
       if (val is List) {
         s.addAll(_flatten(val));
@@ -84,6 +93,7 @@ class QueryParserDefinition extends QueryGrammarDefinition {
   }
 
   // Complex - but see the grammar rule in the super class for an explanation
+  @override
   Parser<Filter> substring() => super.substring().map((each) {
         var init = each[2];
         var finalVal = each[4];
@@ -149,7 +159,7 @@ class QueryGrammarDefinition extends GrammarDefinition {
   @override
   Parser start() => ref(filter).end();
 
-  //  filter     = "(" filtercomp ")"
+  //  filter     = '(' filtercomp ')'
   Parser filter() => LPAREN() & ref(filtercomp) & RPAREN();
 
   //  filtercomp = and / or / not / item
@@ -167,18 +177,18 @@ class QueryGrammarDefinition extends GrammarDefinition {
   //  filtertype = equal / approx / greater / less
   Parser filtertype() => ref(EQUAL) | ref(approx) | ref(GREATER) | ref(LESS);
 
-  //  present    = attr "=*"
+  //  present    = attr '=*'
   // Note: Does not work if used. Always matches the substring rule, not this.
   Parser present() => ref(attr) & ref(token, '=*');
 
   // todo:
-  //  extensible = attr [":dn"] [":" matchingrule] ":=" value
-  //  / [":dn"] ":" matchingrule ":=" value
+  //  extensible = attr [':dn'] [':' matchingrule] ':=' value
+  //  / [':dn'] ':' matchingrule ':=' value
 
 
 
-  //  substring  = attr "=" [initial] any [final]
-  //  [notation] means "optional"
+  //  substring  = attr '=' [initial] any [final]
+  //  [notation] means 'optional'
   Parser substring() =>
       ref(attr) &
       ref(EQUAL) &
@@ -191,7 +201,7 @@ class QueryGrammarDefinition extends GrammarDefinition {
   // final = value  - we use _final because final is a reserved word
   Parser _final() => ref(value);
 
-  //  any        = "*" *(value "*")
+  //  any        = '*' *(value '*')
   Parser _any() => STAR() & (ref(value) & STAR()).star();
 
 
@@ -215,7 +225,7 @@ class QueryGrammarDefinition extends GrammarDefinition {
 
 // Taken from Dart parser. String
 //  Parser STRING_CONTENT_DQ() =>
-//      pattern('^\\"\n\r') | char('\\') & pattern('\n\r');
+//      pattern('^\\'\n\r') | char('\\') & pattern('\n\r');
 
 
 

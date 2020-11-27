@@ -9,8 +9,8 @@ import 'package:asn1lib/asn1lib.dart';
 /// value returned in the control should be used to fetch the next page
 /// of results. See example/paged_search.dart for usage.
 class SimplePagedResultsControl extends Control {
-  @override
   static const OID = '1.2.840.113556.1.4.319';
+  @override
   String get oid => OID;
 
   int size;
@@ -22,7 +22,7 @@ class SimplePagedResultsControl extends Control {
       // todo: refactor superclass - this should be immutable
       this.isCritical = isCritical;
     }
-    _cookie = cookie == null ? Uint8List(0) : cookie;
+    _cookie = cookie ?? Uint8List(0);
   }
 
   // Return true if the cookie is empty. An empty cookie from the
@@ -44,6 +44,7 @@ class SimplePagedResultsControl extends Control {
   //                                -- result set size estimate from server
   //        cookie          OCTET STRING
   //}
+  @override
   ASN1Sequence toASN1() {
     var seq = startSequence();
     assert(_cookie != null);
@@ -69,5 +70,6 @@ class SimplePagedResultsControl extends Control {
     _cookie = _c.valueBytes();
   }
 
-  String toString() => 'SimplePagedResultControl(size=$size, cookie="${_cookie}")';
+  @override
+  String toString() => 'SimplePagedResultControl(size=$size, cookie=${_cookie})';
 }

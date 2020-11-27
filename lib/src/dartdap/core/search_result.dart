@@ -33,14 +33,14 @@ class SearchResult {
   /// entries that match.
 
   Stream<SearchEntry> get stream => _stream;
-  Stream<SearchEntry> _stream;
+  final Stream<SearchEntry> _stream;
 
   /// The controls that may have been returned on search completion.
   ///
   /// These can be used to obtain the cursor, number of remaining results, etc. for VLV search.
 
   // TODO: This needs to be a stream...
-  set controls(List<Control> s) => this._controls = s;
+  set controls(List<Control> s) => _controls = s;
   // Trying to read a control before the stream has been processed is an error
   List<Control>  get controls {
     //if( _stream == null || _stream.isEmpty)

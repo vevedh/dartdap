@@ -193,10 +193,10 @@ class LdapConnection {
   Future<LdapResult> setAutomaticMode(bool newValue) async {
     // TODO: consider deprecating this and eventually getting rid of manual mode
     if (newValue == null) {
-      throw ArgumentError.notNull("autoConnect");
+      throw ArgumentError.notNull('autoConnect');
     }
     if (!(newValue is bool)) {
-      throw ArgumentError.value(newValue, "autoConnect", "not a bool");
+      throw ArgumentError.value(newValue, 'autoConnect', 'not a bool');
     }
 
     var result;
@@ -215,7 +215,7 @@ class LdapConnection {
   //----------------------------------------------------------------
   // Hostname
 
-  static const String _defaultHost = "localhost";
+  static const String _defaultHost = 'localhost';
 
   String _host = _defaultHost;
 
@@ -237,7 +237,7 @@ class LdapConnection {
   /// already open. Close the connection first. A [StateError] exception will be
   /// raised if the connection is already open.
   ///
-  /// If the [hostname] is null or an empty string, it defaults to "localhost".
+  /// If the [hostname] is null or an empty string, it defaults to 'localhost'.
   ///
   /// ## Exceptions
   ///
@@ -250,7 +250,7 @@ class LdapConnection {
     if (n != _host) {
       if (state == ConnectionState.ready ||
           state == ConnectionState.bindRequired) {
-        throw StateError("cannot change host while connection is open");
+        throw StateError('cannot change host while connection is open');
       }
     }
 
@@ -304,22 +304,20 @@ class LdapConnection {
   void setProtocol(bool ssl, [int port, SecurityContext context]) {
     if (port != null) {
       if (port < 0 || 65535 < port) {
-        throw ArgumentError.value(port, "port", "outside range of 0-65535");
+        throw ArgumentError.value(port, 'port', 'outside range of 0-65535');
       }
     }
 
     // Normalize boolean flag and set port number to default, if necessary
     ssl = (ssl == null || !ssl) ? false : true; // treat null as false
-    if (port == null) {
-      port = (ssl) ? portLdaps : portLdap; // use standard port
-    }
+    port ??= (ssl) ? portLdaps : portLdap;
 
     if (ssl != _isSSL || port != _port || context != _context) {
       // Values are being changed
 
       if (state == ConnectionState.ready ||
           state == ConnectionState.bindRequired) {
-        throw StateError("cannot change protocol while connection is open");
+        throw StateError('cannot change protocol while connection is open');
       }
 
       _isSSL = ssl;
@@ -349,8 +347,8 @@ class LdapConnection {
   // These internal members are never null (even though the externally visible
   // methods accept null as valid parameters).
 
-  String _bindDN = ""; // desired values to use, empty string means anonymous
-  String _password = "";
+  String _bindDN = ''; // desired values to use, empty string means anonymous
+  String _password = '';
 
   /// Bind values used in most recent BIND request.
   ///
@@ -361,8 +359,8 @@ class LdapConnection {
   /// In automatic mode, these should always match the desired values, because
   /// the BIND request is automatically sent if it is required.
 
-  String _sentBindDN = "";
-  String _sentPassword = "";
+  String _sentBindDN = '';
+  String _sentPassword = '';
 
   //----------------
   /// The distinguished name used when a BIND request is sent.
@@ -460,7 +458,7 @@ class LdapConnection {
   // For coalescing open, bind, and close requests, these track which are
   // currently in progress.
 
-  // TODO: refactor this to use one "queue" to serialize open/bind/close calls.
+  // TODO: refactor this to use one 'queue' to serialize open/bind/close calls.
   // That will be a cleaner implementation as well as provide more predictable
   // behaviour when multiple open/bind/close calls are made asynchronously and
   // are intermingled. However, any program doing that is already asking for
@@ -472,12 +470,12 @@ class LdapConnection {
   // if you expect mixing asynchronous calls to work. Good programs should
   // wait for the the futures to complete.
 
-  List<Completer> _openCompleters = List<Completer>();
+  final List<Completer> _openCompleters = <Completer>[];
 
-  List<Completer<LdapResult>> _bindCompleters = List<Completer<LdapResult>>();
+  final List<Completer<LdapResult>> _bindCompleters = <Completer<LdapResult>>[];
   var _bindException;
 
-  List<Completer> _closeCompleters = List<Completer>();
+  final List<Completer> _closeCompleters = <Completer>[];
 
   //================================================================
   // State
@@ -529,18 +527,18 @@ class LdapConnection {
   ///   or ssl is changed. Close the connection before making changes.
   ///
   LdapConnection(
-      {String host: null,
-      bool ssl: false,
-      int port: null,
-      String bindDN: null,
-      String password: null,
-      BadCertHandlerType badCertificateHandler: null,
-      SecurityContext context: null}) {
+      {String host,
+      bool ssl = false,
+      int port,
+      String bindDN,
+      String password,
+      BadCertHandlerType badCertificateHandler,
+      SecurityContext context}) {
     setHost(host);
     setProtocol(ssl, port, context);
     _setAuthenticationValues(bindDN, password);
     badCertHandler = badCertificateHandler;
-    this._autoConnect = true; // defaults to automatic mode
+    _autoConnect = true; // defaults to automatic mode
   }
 
   //================================================================
@@ -598,7 +596,7 @@ class LdapConnection {
   /// method can thrown.
   ///
   Future<LdapResult> open() async {
-    loggerConnection.fine("open: ${this.url}");
+    loggerConnection.fine('open: ${url}');
 
     await _requireOpen(true);
 
@@ -623,7 +621,7 @@ class LdapConnection {
   /// queued operations are discarded.
   ///
   Future close([bool immediate = false]) async {
-    loggerConnection.fine("close${immediate ? ": immediate" : ""}");
+    loggerConnection.fine('close${immediate ? ': immediate' : ""}');
 
     if (_openCompleters.isNotEmpty) {
       // Wait for open operation to finish before closing
@@ -637,14 +635,14 @@ class LdapConnection {
       case ConnectionState.ready:
       case ConnectionState.bindRequired:
         await _doClose(immediate);
-        loggerConnection.finer("close: done");
+        loggerConnection.finer('close: done');
         break;
       case ConnectionState.closed:
-        loggerConnection.finer("close: was closed");
+        loggerConnection.finer('close: was closed');
         break;
       case ConnectionState.disconnected:
         await _cmgr.close(immediate);
-        loggerConnection.finer("close: was disconnected");
+        loggerConnection.finer('close: was disconnected');
         break;
     }
     _cmgr = null;
@@ -661,13 +659,13 @@ class LdapConnection {
     if (_closeCompleters.length == 1) {
       // First invocation in the set: perform close
 
-      var theException = null;
+      var theException;
       try {
-        loggerConnection.finest("close: started");
+        loggerConnection.finest('close: started');
 
         await _cmgr.close(immediate);
 
-        loggerConnection.finest("close: done");
+        loggerConnection.finest('close: done');
       } catch (e) {
         theException = e;
         rethrow;
@@ -685,7 +683,7 @@ class LdapConnection {
       // Wait for the close operation (that was performed by the first in the
       // set) to finish and return its result (or throw its exception).
 
-      loggerConnection.finest("close in progress");
+      loggerConnection.finest('close in progress');
       var theException = await c.future;
       if (theException != null) {
         throw theException;
@@ -706,20 +704,20 @@ class LdapConnection {
 
   void _setAuthenticationValues(String bindDN, String password) {
     if (bindDN != null && bindDN is! String) {
-      throw ArgumentError.value(bindDN, "bindDN", "not a String");
+      throw ArgumentError.value(bindDN, 'bindDN', 'not a String');
     }
     if (password != null && password is! String) {
-      throw ArgumentError.value(bindDN, "password", "not a String");
+      throw ArgumentError.value(bindDN, 'password', 'not a String');
     }
 
     if (bindDN == null || bindDN.isEmpty) {
       // Anonymous
-      _bindDN = "";
-      _password = "";
+      _bindDN = '';
+      _password = '';
     } else {
       // Authenticated
       _bindDN = bindDN;
-      _password = password ?? "";
+      _password = password ?? '';
     }
   }
 
@@ -761,21 +759,21 @@ class LdapConnection {
       case ConnectionState.disconnected:
         if (explicitOpen || _autoConnect) {
           if (explicitOpen) {
-            loggerConnection.finer("explicit open");
+            loggerConnection.finer('explicit open');
           } else {
-            loggerConnection.finer("automatic open: ${this.url}");
+            loggerConnection.finer('automatic open: ${url}');
           }
 
           await _doOpen();
         } else {
-          throw StateError("connection is not open: ${this.url}");
+          throw StateError('connection is not open: ${url}');
         }
         break;
       case ConnectionState.bindRequired:
       case ConnectionState.ready:
         // already open
         if (explicitOpen && !_autoConnect) {
-          throw StateError("cannot open: already open: ${this.url}");
+          throw StateError('cannot open: already open: ${url}');
         }
 
         break;
@@ -813,9 +811,9 @@ class LdapConnection {
     if (_openCompleters.length == 1) {
       // First invocation in the set: perform open
 
-      var theException = null;
+      var theException;
       try {
-        loggerConnection.finest("opening connection: started");
+        loggerConnection.finest('opening connection: started');
 
         var tmp = ConnectionManager(_host, _port, _isSSL,
             badCertHandler ?? _defaultBadCertHandler, _context);
@@ -825,10 +823,10 @@ class LdapConnection {
         assert(_cmgr == null || _cmgr.isClosed());
 
         _cmgr = tmp;
-        _sentBindDN = ""; // connection is initially anonymous
-        _sentPassword = "";
+        _sentBindDN = ''; // connection is initially anonymous
+        _sentPassword = '';
 
-        loggerConnection.finest("opening connection: done");
+        loggerConnection.finest('opening connection: done');
       } catch (e) {
         theException = e;
         rethrow;
@@ -846,7 +844,7 @@ class LdapConnection {
       // Wait for the open operation (that was performed by the first in the set)
       // to finish and return its result (or throw its exception).
 
-      loggerConnection.finest("open in progress");
+      loggerConnection.finest('open in progress');
       var theException = await c.future;
       if (theException != null) {
         throw theException;
@@ -875,7 +873,7 @@ class LdapConnection {
         } else {
           // Manual mode: invoker was responsible for opening the connection.
           assert(_cmgr == null);
-          throw StateError("connection not open");
+          throw StateError('connection not open');
         }
         break;
 
@@ -895,7 +893,7 @@ class LdapConnection {
           await _sendBind(mustSend: false);
         } else {
           // Manual mode: invoker was responsible for sending a BIND request.
-          throw StateError("connection requires BIND");
+          throw StateError('connection requires BIND');
         }
         break;
 
@@ -922,7 +920,7 @@ class LdapConnection {
   /// send a BIND request. If it does not need to send a BIND request, it
   /// does not require the connection to be open.
   ///
-  Future<LdapResult> _sendBind({bool mustSend: true}) async {
+  Future<LdapResult> _sendBind({bool mustSend = true}) async {
     assert(mustSend != null);
 
     if (!mustSend) {
@@ -931,7 +929,7 @@ class LdapConnection {
       if (state == ConnectionState.closed ||
           state == ConnectionState.disconnected) {
         // Connection not open: don't (can't) send
-        loggerConnection.finer("bind not required: connection not open");
+        loggerConnection.finer('bind not required: connection not open');
         return null;
       }
 
@@ -939,7 +937,7 @@ class LdapConnection {
 
       if (_sentBindDN == _bindDN && _sentPassword == _password) {
         // Authentication already establshed: don't need to send
-        loggerConnection.finer("bind not required: no change in credentials");
+        loggerConnection.finer('bind not required: no change in credentials');
         return null;
       }
     }
@@ -957,7 +955,7 @@ class LdapConnection {
 
   // Send LDAP BIND request: coalesce multiple invications into one.
   //
-  // A "soft" request to send a BIND request. Soft requests are grouped into
+  // A 'soft' request to send a BIND request. Soft requests are grouped into
   // a set containing the first request and any subsequent soft requests that
   // occur while the first soft request is still being processed. Each set only
   // sends one LDAP BIND request. Every soft request in the set will return
@@ -970,7 +968,7 @@ class LdapConnection {
 
   Future<LdapResult> _sendBindRequestCoalesce() async {
     loggerConnection.finer(
-        "automatic bind: ${(_bindDN.isNotEmpty) ? _bindDN : "anonymous"}");
+        'automatic bind: ${(_bindDN.isNotEmpty) ? _bindDN : 'anonymous'}');
 
     assert(_openCompleters.isEmpty);
     assert(_closeCompleters.isEmpty);
@@ -986,10 +984,10 @@ class LdapConnection {
       // Send the LDAP BIND request
 
       _bindException = null;
-      LdapResult result = null;
+      LdapResult result;
       try {
         loggerConnection.finer(
-            "explicit bind: ${(_bindDN.isNotEmpty) ? _bindDN : "anonymous"}");
+            'explicit bind: ${(_bindDN.isNotEmpty) ? _bindDN : 'anonymous'}');
         result = await _sendBindRequestSeparate();
         _bindException = null;
         return result;
@@ -1023,7 +1021,7 @@ class LdapConnection {
 
   // Send LDAP BIND request: separate one per invocation.
   //
-  // A "hard" request to send a BIND request. An LDAP BIND request is always
+  // A 'hard' request to send a BIND request. An LDAP BIND request is always
   // sent. If this method is called multiple times, one LDAP BIND request
   // will be sent for each one of them.
   //
@@ -1034,9 +1032,9 @@ class LdapConnection {
   // This method is also used inside the implementation of a soft bind request.
 
   Future<LdapResult> _sendBindRequestSeparate() async {
-    var r = await _cmgr.process(BindRequest(this._bindDN, this._password));
+    var r = await _cmgr.process(BindRequest(_bindDN, _password));
     if (r.resultCode == ResultCode.OK) {
-      loggerConnection.finer("bind: success");
+      loggerConnection.finer('bind: success');
       _sentBindDN = _bindDN;
       _sentPassword = _password;
     } else {
@@ -1072,7 +1070,7 @@ class LdapConnection {
   /// opening the connection.
   ///
   Future<LdapResult> bind() async {
-    loggerConnection.fine("bind: ${_bindDN.isEmpty ? "anonymous" : _bindDN}");
+    loggerConnection.fine('bind: ${_bindDN.isEmpty ? 'anonymous' : _bindDN}');
 
     await _requireOpen(false); // note: different from the other operations
     return await _sendBind(mustSend: true);
@@ -1093,9 +1091,9 @@ class LdapConnection {
   ///
   /// Example:
   ///
-  ///     var base = "dc=example,dc=com";
-  ///     var filter = Filter.present("objectClass");
-  ///     var attrs = ["dc", "objectClass"];
+  ///     var base = 'dc=example,dc=com';
+  ///     var filter = Filter.present('objectClass');
+  ///     var attrs = ['dc', 'objectClass'];
   ///
   ///     var sr = await connection.search(base, filter, attrs);
   ///     await for (var entry in sr.stream) {
@@ -1106,10 +1104,10 @@ class LdapConnection {
   ///
   Future<SearchResult> search(
       String baseDN, Filter filter, List<String> attributes,
-      {int scope: SearchScope.SUB_LEVEL,
-      int sizeLimit: 0,
-      List<Control> controls: null}) async {
-    loggerConnection.fine("search");
+      {int scope = SearchScope.SUB_LEVEL,
+      int sizeLimit = 0,
+      List<Control> controls}) async {
+    loggerConnection.fine('search');
 
     await _requireReady();
     return _cmgr.processSearch(
@@ -1123,11 +1121,11 @@ class LdapConnection {
   // See [search]
   Future<SearchResult> query(
       String baseDN, String query, List<String> attributes,
-      {int scope: SearchScope.SUB_LEVEL,
-      int sizeLimit: 0,
-      List<Control> controls: null}) async {
+      {int scope = SearchScope.SUB_LEVEL,
+      int sizeLimit = 0,
+      List<Control> controls}) async {
     var filter = queryParser.getFilter(query);
-    return this.search(baseDN, filter, attributes,
+    return search(baseDN, filter, attributes,
         scope: scope, sizeLimit: sizeLimit, controls: controls);
   }
 
@@ -1145,7 +1143,7 @@ class LdapConnection {
   /// already exists.
   ///
   Future<LdapResult> add(String dn, Map<String, dynamic> attrs) async {
-    loggerConnection.fine("add: $dn");
+    loggerConnection.fine('add: $dn');
     await _requireReady();
     return await _cmgr
         .process(AddRequest(dn, Attribute.newAttributeMap(attrs)));
@@ -1162,7 +1160,7 @@ class LdapConnection {
   /// not exist.
   ///
   Future<LdapResult> delete(String dn) async {
-    loggerConnection.fine("delete: $dn");
+    loggerConnection.fine('delete: $dn');
     await _requireReady();
     return await _cmgr.process(DeleteRequest(dn));
   }
@@ -1178,7 +1176,7 @@ class LdapConnection {
   /// cause the entry to violate LDAP schema rules.
   ///
   Future<LdapResult> modify(String dn, Iterable<Modification> mods) async {
-    loggerConnection.fine("modify");
+    loggerConnection.fine('modify');
     await _requireReady();
     return await _cmgr.process(ModifyRequest(dn, mods));
   }
@@ -1192,7 +1190,7 @@ class LdapConnection {
   ///
   Future<LdapResult> modifyDN(String dn, String rdn,
       {bool deleteOldRDN = true, String newSuperior}) async {
-    loggerConnection.fine("modifyDN");
+    loggerConnection.fine('modifyDN');
     await _requireReady();
     return await _cmgr
         .process(ModDNRequest(dn, rdn, deleteOldRDN, newSuperior));
@@ -1209,7 +1207,7 @@ class LdapConnection {
   ///
   Future<LdapResult> compare(
       String dn, String attrName, String attrValue) async {
-    loggerConnection.fine("compare");
+    loggerConnection.fine('compare');
     await _requireReady();
     return await _cmgr.process(CompareRequest(dn, attrName, attrValue));
   }
@@ -1230,13 +1228,13 @@ class LdapConnection {
 
   /// URL representation of the LDAP connection's host and port.
   ///
-  /// For example, "ldap://example.com" or "ldaps://example.com:10636".
+  /// For example, 'ldap://example.com' or 'ldaps://example.com:10636'.
   ///
   String get url {
     if (_isSSL) {
-      return "ldaps://" + _host + (_port != portLdaps ? ":$_port" : "");
+      return 'ldaps://' + _host + (_port != portLdaps ? ':$_port' : '');
     } else {
-      return "ldap://" + _host + (_port != portLdap ? ":$_port" : "");
+      return 'ldap://' + _host + (_port != portLdap ? ':$_port' : '');
     }
   }
 }
